@@ -1,0 +1,22 @@
+type Event {
+    result: String!
+}
+
+type Bookmark {
+    id: ID!
+    url: String!
+    desc: String!
+}
+
+type Query {
+    getBookmarks: [Bookmark!]
+}
+
+input BookmarkInput {
+    url: String!
+    desc: String!
+}
+type Mutation {
+    addBookmark(bookmark: BookmarkInput!): Event
+    deleteBookmark(bookmarkId: ID!): Event
+}
