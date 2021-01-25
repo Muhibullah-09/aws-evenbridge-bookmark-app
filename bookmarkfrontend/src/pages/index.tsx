@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { addBookmark } from "../graphql/mutations";
-import { getBookmark } from "../graphql/queries";
+import { getBookmarks } from "../graphql/queries";
 import { deleteBookmark } from "../graphql/mutations";
 import { API } from "aws-amplify";
 import { Container, Button, Input, Label, Heading } from 'theme-ui';
@@ -35,7 +35,7 @@ export default function Home() {
   const fetchBookmark = async () => {
     try {
       const data = await API.graphql({
-        query: getBookmark,
+        query: getBookmarks,
       })
       setBookmarkData(data);
       console.log(data);
@@ -68,7 +68,7 @@ export default function Home() {
             </Container>
             <Heading sx={{ color: 'black', fontFamily: 'monospace', textAlign: "center" }}>BookMark List</Heading>
             {bookmarkData.data &&
-              bookmarkData.data.getBookmark.map((item, ind) => (
+              bookmarkData.data.getBookmarks.map((item, ind) => (
                 <div style={{ marginLeft: "1rem", marginTop: "2rem" }} key={ind}>
                   <Map url={item.url} desc={item.desc} />
                   {/* <p>{item.desc}</p><br />

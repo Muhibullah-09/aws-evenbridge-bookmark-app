@@ -4,10 +4,10 @@ import * as appsync from '@aws-cdk/aws-appsync';
 import * as events from '@aws-cdk/aws-events';
 import * as eventsTargets from '@aws-cdk/aws-events-targets';
 import * as dynamoDB from '@aws-cdk/aws-dynamodb';
-// import * as cloudfront from "@aws-cdk/aws-cloudfront";
-// import * as origins from "@aws-cdk/aws-cloudfront-origins";
-// import * as s3 from "@aws-cdk/aws-s3";
-// import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as origins from "@aws-cdk/aws-cloudfront-origins";
+import * as s3 from "@aws-cdk/aws-s3";
+import * as s3deploy from "@aws-cdk/aws-s3-deployment";
 import { requestTemplate, responseTemplate, EVENT_SOURCE } from '../utils/appsync-request-response';
 
 export class CdkBackendStack extends cdk.Stack {
@@ -105,7 +105,7 @@ export class CdkBackendStack extends cdk.Stack {
 
     events.EventBus.grantPutEvents(httpEventTriggerDS);
 
-    ////////// Creating rule to invoke step function on event ///////////////////////
+    ////////// Creating rule to invoke lambda function on event ///////////////////////
     new events.Rule(this, "eventConsumerRule", {
       eventPattern: {
         source: [EVENT_SOURCE],
@@ -114,34 +114,34 @@ export class CdkBackendStack extends cdk.Stack {
     });
 
 
-    // //here I define s3 bucket 
-    // const todosBucket = new s3.Bucket(this, "todosBucket", {
-    //   versioned: true,
-    // });
+    //here I define s3 bucket 
+    const bookmarkBucket = new s3.Bucket(this, "bookmarkBucket", {
+      versioned: true,
+    });
 
-    // todosBucket.grantPublicAccess(); // website visible to all.
+    bookmarkBucket.grantPublicAccess(); // website visible to all.
 
-    // // create a CDN to deploy your website
-    // const distribution = new cloudfront.Distribution(this, "TodosDistribution", {
-    //   defaultBehavior: {
-    //     origin: new origins.S3Origin(todosBucket),
-    //   },
-    //   defaultRootObject: "index.html",
-    // });
-
-
-    // // Prints out the web endpoint to the terminal
-    // new cdk.CfnOutput(this, "DistributionDomainName", {
-    //   value: distribution.domainName,
-    // });
+    // create a CDN to deploy your website
+    const distribution = new cloudfront.Distribution(this, "BookmarkDistribution", {
+      defaultBehavior: {
+        origin: new origins.S3Origin(bookmarkBucket),
+      },
+      defaultRootObject: "index.html",
+    });
 
 
-    // // housekeeping for uploading the data in bucket 
-    // new s3deploy.BucketDeployment(this, "DeployTodoApp", {
-    //   sources: [s3deploy.Source.asset("../frontend/public")],
-    //   destinationBucket: todosBucket,
-    //   distribution,
-    //   distributionPaths: ["/*"],
-    // });
+    // Prints out the web endpoint to the terminal
+    new cdk.CfnOutput(this, "DistributionDomainName", {
+      value: distribution.domainName,
+    });
+
+
+    // housekeeping for uploading the data in bucket 
+    new s3deploy.BucketDeployment(this, "DeployBookmarkApp", {
+      sources: [s3deploy.Source.asset("../bookmarkfrontend/public")],
+      destinationBucket: bookmarkBucket,
+      distribution,
+      distributionPaths: ["/*"],
+    });
   }
 }
